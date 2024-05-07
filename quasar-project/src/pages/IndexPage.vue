@@ -44,10 +44,8 @@ export default {
   },
   methods: {
     handleCreateAccount () {
-      // Lógica para criar uma nova conta
       console.log('Cadastrar Conta clicado')
       this.$router.push('/cadastrar')
-      // Implemente a lógica de criação de conta aqui
     }
   }
 }

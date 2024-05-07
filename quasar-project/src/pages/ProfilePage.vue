@@ -10,6 +10,7 @@
         <li v-for="project in projects" :key="project.id">{{ project.name }}</li>
       </ul>
     </div>
+    <q-btn @click="handleCreateProject" label="Criar projeto" class="q-mt-md" />
   </div>
 </template>
 
@@ -40,6 +41,10 @@ export default {
       } catch (error) {
         console.error('Erro ao buscar os projetos do usuário', error)
       }
+    },
+    handleCreateProject () {
+      console.log('vai para a página criar projeto')
+      this.$router.push('/cadastrar-projeto')
     }
   }
 }
