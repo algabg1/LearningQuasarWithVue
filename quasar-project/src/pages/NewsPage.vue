@@ -47,7 +47,7 @@ export default {
 
 <style scoped>
 .news-page {
-  background-color: #f0f0f0;
+  background-color: var(--background);
   padding: 40px;
 }
 
@@ -64,7 +64,7 @@ export default {
 
 .news-item {
   display: flex;
-  background-color: #fff;
+  background-color: var(--background);
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }

@@ -5,9 +5,9 @@
         <q-form @submit.prevent="handleSubmit" class="login-form">
           <q-input
             outlined
-            v-model="loginData.username"
+            v-model="loginData.email"
             label="Login"
-            placeholder="Digite seu login"
+            placeholder="Digite seu e-mail"
             class="login-input"
           />
           <q-input
@@ -19,9 +19,9 @@
             class="login-input"
           />
           <q-btn
+            flat
             type="submit"
             label="Login"
-            color="primary"
             class="login-btn"
             :loading="isLoading"
           />
@@ -29,7 +29,6 @@
           <q-card-actions align="center">
             <q-btn
               flat
-              color="primary"
               label="Recuperar Conta"
               @click="handleRecoverAccount"
             />
@@ -37,7 +36,6 @@
           <q-card-actions align="center">
             <q-btn
               flat
-              color="primary"
               label="Cadastrar Conta"
               @click="handleCreateAccount"
             />
@@ -69,11 +67,11 @@ export default {
         this.isLoading = true
 
         // Fazendo a chamada GET para o endpoint do proxy
-        const response = await axios.get(`/api/v1/user/${this.loginData.username}`)
+        const response = await axios.get(`/api/v1/users/${this.loginData.username}`)
 
         // Exibindo a resposta no console (substitua isso pela sua lógica de manipulação de dados)
         // eslint-disable-next-line no-unused-vars
-        alert(response.data.data.Id)
+        alert(response.data.data.email)
       } catch (error) {
         console.error('Erro ao autenticar:', error)
         alert('Ocorreu um erro ao autenticar. Por favor, tente novamente.')
