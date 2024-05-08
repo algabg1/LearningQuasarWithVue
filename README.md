@@ -1,6 +1,6 @@
-# LearningQuasarWithVue
+# Projeto Ceres Botânica
 
-## Projeto Ceres Botânica
+## LearningQuasarWithVue
 
 
 ## Nome e email dos integrantes.
