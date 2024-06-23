@@ -6,22 +6,23 @@
           <q-input
             outlined
             v-model="loginData.email"
-            label="Login"
+            label="E-mail"
+            type="email"
             placeholder="Digite seu e-mail"
             class="login-input"
           />
           <q-input
             outlined
-            v-model="loginData.password"
+            v-model="loginData.senha"
             label="Senha"
             type="password"
             placeholder="Digite sua senha"
             class="login-input"
           />
           <q-btn
-            flat
             type="submit"
             label="Login"
+            color="primary"
             class="login-btn"
             :loading="isLoading"
           />
@@ -29,6 +30,7 @@
           <q-card-actions align="center">
             <q-btn
               flat
+              color="primary"
               label="Recuperar Conta"
               @click="handleRecoverAccount"
             />
@@ -36,6 +38,7 @@
           <q-card-actions align="center">
             <q-btn
               flat
+              color="primary"
               label="Cadastrar Conta"
               @click="handleCreateAccount"
             />
@@ -44,76 +47,89 @@
       </q-card-section>
     </q-card>
   </q-page>
- </template>
+</template>
 
-<script>
+<script setup>
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useQuasar } from 'quasar'
+import { setToken } from '../auth'
 import axios from 'axios'
-export default {
-  data () {
-    return {
-      loginData: {
-        username: '',
-        password: ''
-      },
-      isLoading: false
-    }
-  },
-  methods: {
 
-    async handleSubmit () {
-      try {
-        this.isLoading = true
-        // Fazendo a chamada GET para o endpoint do proxy
-        const response = await axios.get(`/api/v1/user/${this.loginData.username}`)
+const $q = useQuasar()
+const router = useRouter()
 
-        // Exibindo a resposta no console (substitua isso pela sua lógica de manipulação de dados)
-        // eslint-disable-next-line no-unused-vars
-        alert(response.data.data.Id)
-      } catch (error) {
-        console.error('Erro ao autenticar:', error)
-        alert('Ocorreu um erro ao autenticar. Por favor, tente novamente.')
-      } finally {
-        this.isLoading = false
-      }
-    },
-    handleRecoverAccount () {
-      // Lógica para recuperar a conta
-      console.log('Recuperar Conta clicado')
-      // Implemente a lógica de recuperação de conta aqui
-    },
-    handleCreateAccount () {
-      // Lógica para criar uma nova conta
-      console.log('Cadastrar Conta clicado')
-      this.$router.push('/cadastrar')
-      // Implemente a lógica de criação de conta aqui
+const loginData = ref({
+  email: '',
+  senha: ''
+})
+const isLoading = ref(false)
+
+async function handleSubmit () {
+  try {
+    isLoading.value = true
+    const response = await axios.post('http://localhost:8080/auth/login', loginData.value)
+
+    if (response.data && response.data.token) {
+      localStorage.setItem('userToken', response.data.token)
+      setToken(response.data.token)
+      // eslint-disable-next-line dot-notation
+      axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`
+
+      $q.notify({
+        color: 'positive',
+        message: 'Login realizado com sucesso!',
+        icon: 'check'
+      })
+
+      router.push('/dashboard')
+    } else {
+      throw new Error('Token não recebido')
     }
+  } catch (error) {
+    console.error('Erro ao autenticar:', error)
+    $q.notify({
+      color: 'negative',
+      message: 'Falha na autenticação. Verifique suas credenciais.',
+      icon: 'warning'
+    })
+  } finally {
+    isLoading.value = false
   }
 }
+
+function handleRecoverAccount () {
+  console.log('Recuperar Conta clicado')
+  // Implemente a lógica de recuperação de conta aqui
+}
+
+function handleCreateAccount () {
+  // Lógica para criar uma nova conta
+  console.log('Cadastrar Conta clicado')
+  router.push('/cadastrar')
+}
+
 </script>
 
- <style scoped>
- /* Estilos específicos para este componente */
- .login-card {
-  max-width: 400px; /* Define a largura máxima do card */
-  margin: 0 auto; /* Centraliza o card na tela */
- }
- .login-form {
+<style scoped>
+.login-card {
+  max-width: 400px;
+  margin: 0 auto;
+}
+.login-form {
   display: flex;
   flex-direction: column;
   align-items: center;
- }
- .login-input {
-  max-width: 300px; /* Define a largura máxima dos inputs */
- }
- .login-password {
-  margin-top: 20px; /* Adicionando margem superior ao campo de senha */
- }
- .login-btn {
-  margin-top: 20px; /* Espaçamento acima do botão de login */
+}
+.login-input {
+  max-width: 300px;
+  margin-bottom: 15px;
+}
+.login-btn {
+  margin-top: 20px;
   transition: transform 0.2s ease-in-out;
 }
-
 .login-btn:active {
   transform: scale(0.95);
 }
- </style>
+</style>
