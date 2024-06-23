@@ -16,7 +16,7 @@
               </q-item-section>
             </q-item>
           </q-list>
-          <q-btn @click="handleCreateAccount" label="Criar Conta" class="q-mt-md" />
+          <q-btn @click="criarConta" label="Criar Conta" color="primary" class="q-mt-md" />
         </div>
       </div>
     </q-page>
@@ -43,9 +43,8 @@ export default {
     }
   },
   methods: {
-    handleCreateAccount () {
-      console.log('Cadastrar Conta clicado')
-      this.$router.push('/cadastrar')
+    criarConta () {
+      // Adicione aqui a lógica para criar uma conta
     }
   }
 }
@@ -66,6 +65,10 @@ export default {
   width: 100%;
 }
 
+.q-page {
+  flex: 1;
+}
+
 .q-img {
   max-width: 100%;
   height: auto;
@@ -74,13 +77,4 @@ export default {
 .no-border .q-item--inset {
   border:none;
 }
-
-.p {
-  color: var(--primary-text);
-}
-
-.q-item {
-  color: var(--primary-text);
-}
-
 </style>

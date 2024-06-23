@@ -85,8 +85,7 @@ export default configure((ctx) => {
           changeOrigin: true,
           secure: false,
           headers: {
-            'Access-Control-Allow-Origin': '*',
-            'x-api-key': 'f8d547f1cca54a5b89f1ab60bcad1ae6'
+            'Access-Control-Allow-Origin': '*'
           }
         }
       }

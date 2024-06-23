@@ -63,7 +63,7 @@ export default {
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: var(--select-background);
+      background: linear-gradient(to bottom, rgba(163, 177, 138, 0.9), rgba(163, 177, 138, 0.6));
       z-index: -1;
       border-radius: 8px;
     }
@@ -83,7 +83,7 @@ export default {
       h1 {
         font-size: 36px;
         font-weight: bold;
-        color: var(--background);
+        color: #fff;
       }
     }
   }
@@ -101,7 +101,7 @@ export default {
         font-size: 18px;
         line-height: 1.8;
         margin-bottom: 20px;
-        color: var(--primary-text);
+        color: #444;
       }
     }
 
@@ -121,7 +121,7 @@ export default {
   .about-footer {
     text-align: center;
     font-size: 18px;
-    color: var(--second-text);
+    color: #666;
 
     i {
       margin: 0 5px;
