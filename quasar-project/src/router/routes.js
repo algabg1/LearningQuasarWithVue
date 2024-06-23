@@ -9,7 +9,9 @@ const routes = [
       { path: 'entrar', name: 'entrar', component: () => import('pages/LoginPage.vue') },
       // { path: 'cadastrar', name: 'cadastrar', component: () => import('pages/CadastrarPage.vue') },
       { path: 'cadastrar', name: 'cadastrar', component: () => import('pages/register/register-view/RegisterView.vue') },
-      { path: 'cadastrar-projeto', name: 'cadastrar projeto', component: () => import('pages/CadastrarProjeto.vue') }
+      { path: 'cadastrar-projeto', name: 'cadastrar projeto', component: () => import('pages/CadastrarProjeto.vue') },
+      { path: 'perfil', name: 'perfil', component: () => import('pages/ProfilePage.vue') },
+      { path: 'cadastrar-planta', name: 'cadastrar planta', component: () => import('pages/CadastrarPlanta.vue') }
     ]
   },
   // { path: 'cadastrar', name: 'cadastrar', component: () => import('pages/CadastrarPage.vue') }
