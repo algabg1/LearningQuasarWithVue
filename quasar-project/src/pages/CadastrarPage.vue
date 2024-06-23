@@ -37,15 +37,14 @@
           <q-btn
             type="submit"
             label="Cadastrar"
-            color="primary"
             class="register-btn"
             :loading="isLoading"
           />
           <q-space />
           <q-card-actions align="center">
             <q-btn
+              class="q-btn"
               flat
-              color="primary"
               label="Voltar para o Login"
               @click="handleLogin"
             />
