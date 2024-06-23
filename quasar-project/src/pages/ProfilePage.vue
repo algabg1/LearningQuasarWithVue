@@ -1,68 +1,53 @@
 <template>
-  <div class="principal">
-    <div class="profile-infos">
-      <h2> {{ userProfile.name }} </h2>
-      <p> {{ userProfile.email }}</p>
-    </div>
-    <div class="projects-list">
-      <h3>Projetos</h3>
-      <ul>
-        <li v-for="project in projects" :key="project.id">{{ project.name }}</li>
-      </ul>
-    </div>
-    <q-btn @click="handleCreateProject" label="Criar projeto" class="q-mt-md" />
-  </div>
+  <q-page padding>
+    <q-card>
+      <q-card-section>
+        <div v-if="user">
+          <h2>Bem-vindo, {{ user.nome }}!</h2>
+          <q-separator />
+          <div v-if="user.user_role === 'ADMIN'">
+            <h3>Painel de Administrador</h3>
+            <p>Você possui permissões de administrador.</p>
+            <!-- Adicione aqui mais conteúdo específico para administradores -->
+          </div>
+          <div v-else>
+            <h3>Painel de Usuário</h3>
+            <p>Bem-vindo ao seu painel de usuário.</p>
+            <!-- Adicione aqui mais conteúdo específico para usuários -->
+          </div>
+        </div>
+        <q-btn @click="handleLogout" color="primary" label="Sair" />
+      </q-card-section>
+    </q-card>
+  </q-page>
 </template>
 
-<script>
-export default {
-  data () {
-    return {
-      userProfile: {
-        name: '',
-        email: ''
-      },
-      projects: []
-    }
-  },
-  mounted () {
-    this.userProfile = {
-      name: 'Nome do Usuário',
-      email: 'nome_de_usuario'
-    }
-    this.fetchUserProjects()
-  },
-  methods: {
-    async fetchUserProjects () {
-      try {
-        const response = await fetch(`/api/v2/projects/${this.projects.name}`)
-        const data = await response.json()
-        this.projects = data.projects
-      } catch (error) {
-        console.error('Erro ao buscar os projetos do usuário', error)
-      }
-    },
-    handleCreateProject () {
-      console.log('vai para a página criar projeto')
-      this.$router.push('/cadastrar-projeto')
-    }
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+
+const user = ref(null)
+const router = useRouter()
+
+onMounted(() => {
+  const userData = localStorage.getItem('userData')
+  if (!userData) {
+    router.push('/login')
+  } else {
+    user.value = JSON.parse(userData)
   }
+})
+
+function handleLogout () {
+  localStorage.removeItem('userToken')
+  localStorage.removeItem('userData')
+  router.push('/home')
 }
 </script>
 
 <style scoped>
-  .profile-infos {
-    background-color: var(--select-background);
-    z-index: -1;
-    border-radius: 8px;
-    padding: 1%;
-    display: flex;
-    flex-direction: column;
-    align-items: left;
-    z-index: 1
-  }
-
-  .principal {
-    padding: 5%;
-  }
+h2, h3 {
+  margin: 0;
+  padding: 10px 0;
+}
 </style>

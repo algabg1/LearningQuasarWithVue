@@ -3,11 +3,13 @@
     <h1 class="title">Cadastrar Planta</h1>
     <div class="form-container">
       <form>
+        <img v-if="imageUrl" :src="imageUrl" alt="Avatar do Usuário" class="avatar" />
+        <input type="file" @change="onFileChange" accept="image/*" />
         <input placeholder="Nome planta" type="text">
         <input placeholder="Adicionar Informações" type="text">
         <button type="button" class="btn-submit">Adicionar aos meus projetos</button>
       </form>
-      <input type="file" name="" id="">
+
     </div>
 
   </div>
@@ -15,7 +17,24 @@
 
 <script>
 export default {
-  name: 'CadastrarPlanta'
+  name: 'CadastrarPlanta',
+  data () {
+    return {
+      imageUrl: ''
+    }
+  },
+  methods: {
+    onFileChange (event) {
+      const file = event.target.files[0] // Obtém o arquivo selecionado
+      if (file) {
+        const reader = new FileReader()
+        reader.onload = (e) => {
+          this.imageUrl = e.target.result // Armazena a URL da imagem
+        }
+        reader.readAsDataURL(file) // Lê o arquivo como um Data URL
+      }
+    }
+  }
 }
 </script>
 
@@ -66,6 +85,12 @@ export default {
     &:hover {
       background-color: #45a049;
     }
+  }
+
+  .avatar {
+  border-radius: 50%;
+  width: 150px;
+  height: 150px;
   }
 
 }

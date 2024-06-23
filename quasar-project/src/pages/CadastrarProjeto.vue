@@ -1,120 +1,154 @@
 <template>
-  <q-page padding>
-    <q-card class="create-project-card">
-      <q-card-section>
-        <h5 align="center">Cadastrar novo projeto</h5>
-        <q-form @submit.prevent="submitForm" class="create-project-form">
-          <q-input
-            outlined
-            v-model="project.name"
-            label="Nome do Projeto"
-            placeholder="Digite o nome do projeto"
-            class="create-project-input"
-          />
-          <q-input
-            outlined
-            v-model="project.description"
-            label="Descrição do Projeto"
-            placeholder="Digite a descrição do projeto"
-            class="create-project-input"
-          />
-          <q-select
-            outlined
-            v-model="project.type"
-            :options="projectTypes"
-            label="Tipo de Projeto"
-            placeholder="Selecione o tipo de projeto"
-            class="create-project-input"
-          />
-          <q-btn
-            type="submit"
-            label="Cadastrar"
-            class="create-project-btn"
-            :loading="isLoading"
-          />
-        </q-form>
-      </q-card-section>
-    </q-card>
-  </q-page>
+  <div class="create-project-wrapper">
+    <div class="create-project-form">
+      <h1>Cadastrar Projeto</h1>
+      <form @submit.prevent="submitForm">
+        <div class="form-group">
+          <label for="projectName">Nome do Projeto</label>
+          <input type="text" id="projectName" v-model="project.nome" required>
+        </div>
+        <div class="form-group">
+          <label for="projectDescription">Descrição do Projeto</label>
+          <textarea id="projectDescription" v-model="project.descricao" required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="projectType">Tipo de Projeto</label>
+          <select id="projectType" v-model="project.tipo_projeto" required>
+            <option value="" disabled selected>Selecione o tipo de projeto</option>
+            <option value="JARDIM_BORBOLETAS">Jardim de Borboletas</option>
+            <option value="HORTICULTURA">Horticultura</option>
+            <option value="PAISAGISMO">Paisagismo</option>
+            <option value="HIDROPONIA">Hidroponia</option>
+            <option value="JARDIM_TERAPEUTICO">Jardim Terapêutico</option>
+            <option value="JARDIM_ERVAS">Jardim de Ervas</option>
+            <option value="HORTA_ORGANICA">Horta Orgânica</option>
+            <option value="TERRARIO">Terrário</option>
+            <option value="JARDIM_FLORES">Jardim de Flores</option>
+          </select>
+        </div>
+        <button type="submit">Cadastrar</button>
+      </form>
+    </div>
+  </div>
 </template>
 
 <script>
-import { ref } from 'vue'
 import axios from 'axios'
-import { useRouter } from 'vue-router'
 
 export default {
-  setup () {
-    const router = useRouter()
-
-    const project = ref({
-      name: '',
-      description: '',
-      type: ''
-    })
-
-    const isLoading = ref(false)
-
-    // Opções para o dropdown de Tipo de Projeto
-    const projectTypes = [
-      'JARDIM_BORBOLETAS',
-      'HORTICULTURA',
-      'PAISAGISMO',
-      'HIDROPONIA',
-      'JARDIM_TERAPEUTICO',
-      'JARDIM_ERVAS',
-      'HORTA_ORGANICA',
-      'TERRARIO',
-      'JARDIM_FLORES'
-    ]
-
-    const submitForm = async () => {
-      isLoading.value = true
-      try {
-        const response = await axios.post('http://localhost:8080/projeto/criar', project.value)
-        if (response.status === 201 || response.status === 200) {
-          alert('Projeto cadastrado com sucesso!')
-          router.push('/perfil') // redireciona para a página inicial após o cadastro
-        } else {
-          alert('Ocorreu um erro durante o cadastro do projeto. Tente novamente.')
-        }
-      } catch (error) {
-        console.error('Erro ao cadastrar projeto:', error)
-        alert('Ocorreu um erro durante o cadastro do projeto. Tente novamente.')
-      } finally {
-        isLoading.value = false
+  data () {
+    return {
+      project: {
+        nome: '',
+        descricao: '',
+        tipo_projeto: ''
       }
     }
+  },
+  methods: {
+    async submitForm () {
+      const userId = JSON.parse(localStorage.getItem('userData')).id
+      const token = localStorage.getItem('userToken')
+      const url = 'http://localhost:8080/projeto/criar'
 
-    return {
-      project,
-      projectTypes,
-      isLoading,
-      submitForm
+      const projectData = {
+        nome: this.project.nome,
+        descricao: this.project.descricao,
+        idUsuario: userId,
+        tipo_projeto: this.project.tipo_projeto
+      }
+
+      try {
+        const response = await axios.post(url, projectData, {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          }
+        })
+
+        if (response.status === 201 || response.status === 200) {
+          this.$q.notify({
+            color: 'positive',
+            message: 'Projeto criado com sucesso!',
+            icon: 'check',
+            position: 'top',
+            timeout: 2000
+          })
+          this.resetForm()
+        } else {
+          throw new Error('Resposta inesperada do servidor')
+        }
+      } catch (error) {
+        this.$q.notify({
+          color: 'negative',
+          message: 'Erro ao criar projeto: ' + (error.response?.data?.message || error.message),
+          icon: 'error',
+          position: 'top',
+          timeout: 2000
+        })
+      }
+    },
+    resetForm () {
+      this.project.nome = ''
+      this.project.descricao = ''
+      this.project.tipo_projeto = ''
     }
   }
 }
 </script>
 
-<style scoped>
-.create-project-card {
-  max-width: 400px;
-  margin: 0 auto;
-}
-.create-project-form {
+<style>
+.create-project-wrapper {
+  background-color: #a3b18a;
+  min-height: 100vh;
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   align-items: center;
 }
-.create-project-input {
-  max-width: 300px;
-  margin-bottom: 15px;
+
+.create-project-form {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 40px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 400px;
 }
-.create-project-btn {
-  margin-top: 20px;
-  transition: transform 0.2s ease-in-out;
+
+h1 {
+  font-size: 24px;
+  margin-bottom: 20px;
 }
-.create-project-btn:active {
-  transform: scale(0.95);
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+label {
+  font-weight: bold;
+}
+
+input[type="text"],
+textarea,
+select {
+  width: 100%;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+  margin-top: 6px;
+}
+
+button[type="submit"] {
+  background-color: #4caf50;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button[type="submit"]:hover {
+  background-color: #45a049;
 }
 </style>
