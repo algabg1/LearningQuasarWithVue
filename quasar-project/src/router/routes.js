@@ -12,7 +12,8 @@ const routes = [
       { path: 'cadastrar-projeto', name: 'cadastrar projeto', component: () => import('pages/CadastrarProjeto.vue') },
       { path: 'perfil', name: 'perfil', component: () => import('pages/ProfilePage.vue') },
       { path: 'cadastrar-planta', name: 'cadastrar planta', component: () => import('pages/CadastrarPlanta.vue') },
-      { path: 'lista-plantas', name: 'lista plantas', component: () => import('pages/ListaPlantas.vue') }
+      { path: 'lista-plantas', name: 'lista plantas', component: () => import('pages/ListaPlantas.vue') },
+      { path: 'minha-conta', name: 'minha conta', component: () => import('pages/MinhaConta.vue') }
     ]
   },
   // { path: 'cadastrar', name: 'cadastrar', component: () => import('pages/CadastrarPage.vue') }
