@@ -4,7 +4,6 @@
     <div class="user-info">
       <div class="profile-infos">
         <div class="user-header">
-          <img v-if="imageUrl" :src="imageUrl" alt="Avatar do Usuário" class="avatar" />
           <h2 class="user-name">{{ user.name }}</h2>
         </div>
         <div class="user-details">
@@ -15,10 +14,6 @@
             <p>{{ user.description }}</p>
           </div>
         </div>
-        <label for="file-upload" class="file-label">
-          Carregar Imagem
-          <input id="file-upload" type="file" @change="onFileChange" accept="image/*" class="file-input">
-        </label>
       </div>
       <div class="projects-list">
         <h3>Projetos</h3>
@@ -27,7 +22,13 @@
             <button @click="handleProjectClick(project.id)" class="project-button">{{ project.name }}</button>
           </li>
         </ul>
-        <button @click="handleCreateProject" class="create-btn">Criar projeto</button>
+        <div v-if="user.role === 'ADMIN'" class="button-group">
+          <button @click="handleCreateProject" class="create-btn">Criar projeto</button>
+          <button @click="handleCreatePlant" class="create-btn">Cadastrar planta</button>
+        </div>
+        <div v-else class="button-group">
+          <button @click="handleCreateProject" class="create-btn">Criar projeto</button>
+        </div>
       </div>
     </div>
   </div>
@@ -41,9 +42,9 @@ export default {
       user: {
         name: 'Nome do Usuário',
         email: 'nome_de_usuario@gmail.com',
-        description: 'Descrição do usuário'
+        description: 'Descrição do usuário',
+        role: 'ADMIN' // Define o papel do usuário como 'USER' para usuário normal
       },
-      imageUrl: '', // URL da imagem selecionada
       projects: []
     }
   },
@@ -65,21 +66,15 @@ export default {
     },
     handleCreateProject () {
       console.log('Vai para a página criar projeto')
-      // Adicionar aqui o redirecionamento para a página de criar projeto
+      this.$router.push('/cadastrar-projeto')
     },
     handleProjectClick (projectId) {
       console.log('Projeto clicado:', projectId)
-      // Adicionar aqui a lógica para redirecionar para a página do projeto clicado
+      this.$router.push('projetos')
     },
-    onFileChange (event) {
-      const file = event.target.files[0] // Obtém o arquivo selecionado
-      if (file) {
-        const reader = new FileReader()
-        reader.onload = (e) => {
-          this.imageUrl = e.target.result // Armazena a URL da imagem
-        }
-        reader.readAsDataURL(file) // Lê o arquivo como um Data URL
-      }
+    handleCreatePlant () {
+      console.log('Vai para a página cadastrar planta')
+      this.$router.push('/cadastrar-planta')
     }
   }
 }
@@ -140,24 +135,6 @@ export default {
   margin: 5px 0;
 }
 
-.file-label {
-  display: inline-block;
-  margin-top: 20px;
-  padding: 10px 15px;
-  background-color: #afc6a6;
-  color: #fff;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.file-label:hover {
-  background-color: #7aaf7c;
-}
-
-.file-input {
-  display: none;
-}
-
 .projects-list {
   background-color: #f7f7f7;
   border-radius: 8px;
@@ -199,9 +176,16 @@ export default {
   border-radius: 5px;
   padding: 10px 65px;
   cursor: pointer;
+  margin-right: 10px;
 }
 
 .create-btn:hover {
   background-color: #7aaf7c;
+}
+
+.button-group {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
 }
 </style>
