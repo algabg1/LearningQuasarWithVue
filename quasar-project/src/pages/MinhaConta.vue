@@ -35,6 +35,8 @@
 </template>
 
 <script>
+import axios from 'axios'
+
 export default {
   name: 'UserPage',
   data () {
@@ -43,13 +45,14 @@ export default {
         name: 'Nome do Usuário',
         email: 'nome_de_usuario@gmail.com',
         description: 'Descrição do usuário',
-        role: 'ADMIN' // Define o papel do usuário como 'USER' para usuário normal
+        role: '' // Papel do usuário será obtido do backend
       },
       projects: []
     }
   },
   mounted () {
     this.fetchUserProjects()
+    this.fetchUserRole() // Chama a função para obter o papel do usuário
   },
   methods: {
     async fetchUserProjects () {
@@ -63,6 +66,16 @@ export default {
       } catch (error) {
         console.error('Erro ao buscar os projetos do usuário', error)
       }
+    },
+    fetchUserRole () {
+      axios.get('/user')
+        .then(response => {
+          const userRole = response.data.role
+          this.user.role = userRole // Atualiza o papel do usuário com os dados do backend
+        })
+        .catch(error => {
+          console.error('Erro ao obter o papel do usuário:', error)
+        })
     },
     handleCreateProject () {
       console.log('Vai para a página criar projeto')
