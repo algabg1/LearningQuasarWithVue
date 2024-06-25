@@ -2,7 +2,7 @@
   <q-page padding>
     <div class="row q-col-gutter-md">
       <div class="col-12">
-        <h2 class="text-h4 q-mb-md">{{ isAdmin ? 'Todas as Plantas' : 'Plantas' }}</h2>
+        <h2 class="text-h4 q-mb-md">Plantas Cadastradas</h2>
       </div>
       <div class="col-12 col-md-6">
         <q-input v-model="searchTerm" label="Pesquisar plantas" dense>
@@ -13,9 +13,9 @@
       </div>
       <div class="col-12 col-md-6">
         <q-select
-          v-model="selectedType"
-          :options="plantsTypes"
-          label="Filtrar por tipo"
+          v-model="selectedCategory"
+          :options="categorias"
+          label="Filtrar por categoria"
           dense
           emit-value
           map-options
@@ -25,83 +25,138 @@
           </template>
         </q-select>
       </div>
-      <div class="col-12">
-        <q-btn
-          color="primary"
-          label="Adicionar Planta"
-          @click="openAdicionarPlantaDialog"
-          class="q-mr-sm"
-        />
-      </div>
       <div v-if="loading" class="col-12 flex flex-center">
         <q-spinner color="primary" size="3em" />
       </div>
-      <template v-else-if="filteredPlants.length">
-        <div v-for="plant in filteredPlants" :key="plant.id" class="col-12 col-sm-6 col-md-4">
-          <q-card class="project-card">
-            <q-card-section>
-              <div class="text-h6">{{ plant.nome }}</div>
-              <q-chip :color="getProjectTypeColor(plant.categoria)" text-color="white">
-                {{ plant.categoria }}
-              </q-chip>
+      <template v-else-if="filteredPlantas.length">
+        <div v-for="planta in filteredPlantas" :key="planta.id" class="col-12 col-sm-6 col-md-4">
+          <q-card class="planta-card q-ma-sm">
+            <q-card-section class="bg-green-1">
+              <div class="row items-center no-wrap">
+                <q-icon name="eco" size="2rem" color="green" class="q-mr-md" />
+                <div>
+                  <div class="text-h6">{{ planta.nome }}</div>
+                  <div class="text-subtitle2">{{ planta.nome_cientifico }}</div>
+                </div>
+              </div>
             </q-card-section>
-            <q-card-section>
-              <p>{{ plant.nomecientifico }}</p>
+
+            <q-card-section class="bg-green-2">
+              <div class="row items-center q-gutter-sm">
+                <q-chip :color="getCategoryColor(planta.categoria)" text-color="white">
+                  {{ planta.categoria }}
+                </q-chip>
+              </div>
             </q-card-section>
+
+            <q-card-section class="bg-green-1">
+              <q-item>
+                <q-item-section avatar>
+                  <q-icon name="description" color="primary" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label overline>Descrição</q-item-label>
+                  <q-item-label caption>{{ planta.descricao.substring(0, 100) }}...</q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-card-section>
+
             <q-card-actions align="right">
-              <q-btn flat color="primary" label="Editar" @click="editProject(plant)" />
-              <q-btn flat color="negative" label="Excluir" @click="confirmDeleteProject(plant)" />
+              <q-btn flat color="primary" label="Visualizar" @click="visualizarPlanta(planta)" />
+              <q-btn v-if="isAdmin" flat color="secondary" label="Editar" @click="editarPlanta(planta)" />
+              <q-btn v-if="isAdmin" flat color="negative" label="Excluir" @click="confirmarExclusao(planta)" />
             </q-card-actions>
           </q-card>
         </div>
       </template>
       <div v-else class="col-12 text-center">
-        <p>Nenhum planta encontrada.</p>
+        <p>Nenhuma planta encontrada.</p>
       </div>
     </div>
 
-    <!-- Diálogo para Adicionar Planta -->
-    <q-dialog v-model="adicionarPlantaDialog" persistent>
-      <q-card style="min-width: 350px">
-        <q-card-section>
-          <div class="text-h6">Adicionar Planta</div>
+    <q-dialog v-model="visualizarDialog">
+      <q-card style="width: 700px; max-width: 80vw;">
+        <q-card-section class="bg-green-2 text-white">
+          <div class="text-h6">{{ plantaSelecionada.nome }}</div>
+          <div class="text-subtitle2">{{ plantaSelecionada.nome_cientifico }}</div>
         </q-card-section>
 
-        <q-card-section class="q-pt-none">
-          <q-input v-model="novaplanta.nome" label="Nome" dense />
-          <q-input v-model="novaplanta.nome_cientifico" label="Nome Científico" dense />
-          <q-input v-model="novaplanta.descricao" label="Descrição" type="textarea" dense />
-          <q-input v-model="novaplanta.origem" label="Origem" dense />
-          <q-input v-model="novaplanta.cuidados" label="Cuidados" type="textarea" dense />
-          <q-select
-            v-model="novaplanta.categoria"
-            :options="categorias"
-            label="Categoria"
-            dense
-            options-dense
-            emit-value
-            map-options
-          />
-          <q-input v-model="novaplanta.dataregistro" label="Data de Registro" type="date" dense />
+        <q-card-section class="bg-blue-1 q-pa-md">
+          <div class="row q-col-gutter-md">
+            <div class="col-12 col-sm-6">
+              <q-item class="bg-yellow-1 rounded-borders q-mb-sm">
+                <q-item-section avatar>
+                  <q-icon name="category" color="orange" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label overline>Categoria</q-item-label>
+                  <q-item-label class="text-weight-bold">{{ plantaSelecionada.categoria }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </div>
+            <div class="col-12 col-sm-6">
+              <q-item class="bg-red-1 rounded-borders q-mb-sm">
+                <q-item-section avatar>
+                  <q-icon name="event" color="red" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label overline>Data de Registro</q-item-label>
+                  <q-item-label class="text-weight-bold">{{ formatDate(plantaSelecionada.dataregistro) }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </div>
+            <div class="col-12">
+              <q-item class="bg-green-1 rounded-borders q-mb-sm">
+                <q-item-section avatar>
+                  <q-icon name="description" color="green" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label overline>Descrição</q-item-label>
+                  <q-item-label class="text-weight-medium">{{ plantaSelecionada.descricao }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </div>
+            <div class="col-12">
+              <q-item class="bg-purple-1 rounded-borders q-mb-sm">
+                <q-item-section avatar>
+                  <q-icon name="place" color="purple" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label overline>Origem</q-item-label>
+                  <q-item-label class="text-weight-medium">{{ plantaSelecionada.origem }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </div>
+            <div class="col-12">
+              <q-item class="bg-blue-1 rounded-borders">
+                <q-item-section avatar>
+                  <q-icon name="spa" color="blue" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label overline>Cuidados</q-item-label>
+                  <q-item-label class="text-weight-medium">{{ plantaSelecionada.cuidados }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </div>
+          </div>
         </q-card-section>
 
-        <q-card-actions align="right" class="text-primary">
-          <q-btn flat label="Cancelar" v-close-popup />
-          <q-btn flat label="Adicionar" @click="adicionarPlanta" v-close-popup />
+        <q-card-actions align="right" class="bg-white text-black">
+          <q-btn flat label="Fechar" color="primary" v-close-popup />
         </q-card-actions>
       </q-card>
     </q-dialog>
 
-    <!-- Confirm Delete Dialog -->
-    <q-dialog v-model="confirmDelete">
+    <!-- Diálogo de Confirmação de Exclusão -->
+    <q-dialog v-model="confirmarExclusaoDialog">
       <q-card>
         <q-card-section class="row items-center">
           <q-avatar icon="delete" color="negative" text-color="white" />
-          <span class="q-ml-sm">Tem certeza que deseja excluir este projeto?</span>
+          <span class="q-ml-sm">Tem certeza que deseja excluir esta planta?</span>
         </q-card-section>
         <q-card-actions align="right">
           <q-btn flat label="Cancelar" color="primary" v-close-popup />
-          <q-btn flat label="Excluir" color="negative" @click="deleteProject" v-close-popup />
+          <q-btn flat label="Excluir" color="negative" @click="excluirPlanta" v-close-popup />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -110,34 +165,27 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+// eslint-disable-next-line import/no-duplicates
 import { useQuasar } from 'quasar'
 import { api } from 'boot/axios'
+// eslint-disable-next-line import/no-duplicates
+import { date } from 'quasar'
 
 const $q = useQuasar()
-const plants = ref([])
+const plantas = ref([])
 const loading = ref(true)
-const adicionarPlantaDialog = ref(false)
-const confirmDelete = ref(false)
-const projectToDelete = ref(null)
 const searchTerm = ref('')
-const selectedType = ref(null)
+const selectedCategory = ref(null)
+const visualizarDialog = ref(false)
+const confirmarExclusaoDialog = ref(false)
+const plantaSelecionada = ref({})
 
 const user = ref(JSON.parse(localStorage.getItem('userData')))
 const isAdmin = computed(() => user.value.user_role === 'ADMIN')
 
-const newPlant = ref({
-  nome: '',
-  nome_cientifico: '',
-  descricao: '',
-  origem: '',
-  cuidados: '',
-  dataregistro: '',
-  categoria: ''
-})
-
-const plantsTypes = [
-  { label: 'Todos', value: null },
-  { label: 'Briofita', value: 'BRIOFITA' },
+const categorias = [
+  { label: 'Todas', value: null },
+  { label: 'Briófita', value: 'BRIOFITA' },
   { label: 'Pteridófita', value: 'PTERIDOFITA' },
   { label: 'Gimnosperma', value: 'GIMNOSPERMA' },
   { label: 'Angiosperma', value: 'ANGIOSPERMA' },
@@ -164,36 +212,28 @@ const plantsTypes = [
   { label: 'Camponesa', value: 'CAMPONESA' }
 ]
 
-const categorias = computed(() =>
-  plantsTypes.filter(type => type.value !== null)
-)
-
-const filteredPlants = computed(() => {
-  return plants.value.filter(plant => {
-    const matchesSearch = plant.nome.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
-                          plant.nome_cientifico.toLowerCase().includes(searchTerm.value.toLowerCase())
-    const matchesType = !selectedType.value || plant.categoria === selectedType.value
-    return matchesSearch && matchesType
+const filteredPlantas = computed(() => {
+  return plantas.value.filter(planta => {
+    const matchesSearch = planta.nome.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
+                          planta.nome_cientifico.toLowerCase().includes(searchTerm.value.toLowerCase())
+    const matchesCategory = !selectedCategory.value || planta.categoria === selectedCategory.value
+    return matchesSearch && matchesCategory
   })
 })
 
 onMounted(async () => {
-  await fetchProjects()
+  await fetchPlantas()
 })
 
-async function fetchProjects () {
+async function fetchPlantas () {
   try {
     const token = localStorage.getItem('userToken')
-    const endpoint = isAdmin.value
-      ? 'http://localhost:8080/planta/plantas'
-      : `http://localhost:8080/planta/plantas/${user.value.id}`
-
-    const response = await api.get(endpoint, {
+    const response = await api.get('http://localhost:8080/planta/plantas', {
       headers: { Authorization: `Bearer ${token}` }
     })
-    plants.value = response.data
+    plantas.value = response.data
   } catch (error) {
-    console.error('Error fetching plants:', error)
+    console.error('Erro ao carregar plantas:', error)
     $q.notify({
       color: 'negative',
       message: 'Erro ao carregar plantas',
@@ -204,106 +244,56 @@ async function fetchProjects () {
   }
 }
 
-function getProjectTypeColor (type) {
+function getCategoryColor (category) {
   const colors = {
-    BRIOFITA: 'forestgreen',
-    PTERIDOFITA: 'limegreen',
-    GIMNOSPERMA: 'darkgreen',
-    ANGIOSPERMA: 'yellowgreen',
-    HERBACEA: 'springgreen',
-    ARBUSTO: 'olive',
-    ARVORE: 'green',
-    TREPADEIRA: 'seagreen',
-    SUCULENTA: 'mediumseagreen',
-    CACTO: 'darkolivegreen',
-    ORQUIDEA: 'orchid',
-    BROMELIA: 'magenta',
-    AEROFITA: 'skyblue',
-    HIDROFITA: 'deepskyblue',
-    XEROFITA: 'sandybrown',
-    LITOFITA: 'goldenrod',
-    EPIFITA: 'lightblue',
-    CAMPESTRE: 'greenyellow',
-    RIPICOLA: 'turquoise',
-    PARASITA: 'crimson',
-    CARNIVORA: 'red',
-    AQUATICA: 'aqua',
-    LAGUNAR: 'dodgerblue',
-    FLORESTAL: 'darkslategrey',
-    CAMPONESA: 'peru'
+    BRIOFITA: 'light-green',
+    PTERIDOFITA: 'green',
+    GIMNOSPERMA: 'teal',
+    ANGIOSPERMA: 'lime',
+    HERBACEA: 'light-green-5',
+    ARBUSTO: 'green-6',
+    ARVORE: 'green-9',
+    TREPADEIRA: 'light-green-3',
+    SUCULENTA: 'cyan',
+    CACTO: 'green-10',
+    ORQUIDEA: 'pink',
+    BROMELIA: 'deep-orange',
+    AEROFITA: 'blue-2',
+    HIDROFITA: 'blue',
+    XEROFITA: 'amber',
+    LITOFITA: 'brown',
+    EPIFITA: 'light-blue',
+    CAMPESTRE: 'light-green-6',
+    RIPICOLA: 'cyan-8',
+    PARASITA: 'red',
+    CARNIVORA: 'purple',
+    AQUATICA: 'blue-5',
+    LAGUNAR: 'indigo',
+    FLORESTAL: 'green-8',
+    CAMPONESA: 'amber-8'
   }
-  return colors[type] || 'grey'
+  return colors[category] || 'grey'
 }
 
-function openAdicionarPlantaDialog () {
-  adicionarPlantaDialog.value = true
+function visualizarPlanta (planta) {
+  plantaSelecionada.value = planta
+  visualizarDialog.value = true
 }
 
-function resetNewProject () {
-  newPlant.value = {
-    nome: '',
-    nomecientifico: '',
-    descricao: '',
-    origem: '',
-    cuidados: '',
-    dataregistro: '',
-    categoria: ''
-  }
+function editarPlanta (planta) {
+  // Implementar a lógica de edição
+  console.log('Editar planta:', planta)
 }
 
-async function adicionarPlanta () {
-  // Validação de campos
-  if (!newPlant.value.nome || !newPlant.value.nomecientifico || !newPlant.value.descricao) {
-    $q.notify({
-      color: 'negative',
-      message: 'Todos os campos devem ser preenchidos',
-      icon: 'error'
-    })
-    return
-  }
+function confirmarExclusao (planta) {
+  plantaSelecionada.value = planta
+  confirmarExclusaoDialog.value = true
+}
 
+async function excluirPlanta () {
   try {
     const token = localStorage.getItem('userToken')
-    const projectData = {
-      ...newPlant.value,
-      categoria: newPlant.value.categoria.value // Aqui garantimos que apenas o valor seja enviado
-    }
-    console.log('Plant data being sent:', projectData) // Log para depuração
-    await api.post('http://localhost:8080/planta/criar', projectData, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-    $q.notify({
-      color: 'positive',
-      message: 'Planta cadastrada com sucesso',
-      icon: 'check'
-    })
-    adicionarPlantaDialog.value = false
-    resetNewProject()
-    await fetchProjects()
-  } catch (error) {
-    console.error('Error creating plant:', error.response ? error.response.data : error)
-    $q.notify({
-      color: 'negative',
-      message: 'Erro ao criar planta: ' + (error.response?.data?.message || error.message),
-      icon: 'error'
-    })
-  }
-}
-
-function editProject (plant) {
-  // Implement edit functionality
-  console.log('Edit project:', plant)
-}
-
-function confirmDeleteProject (plant) {
-  projectToDelete.value = plant
-  confirmDelete.value = true
-}
-
-async function deleteProject () {
-  try {
-    const token = localStorage.getItem('userToken')
-    await api.delete(`http://localhost:8080/planta/${projectToDelete.value.id}`, {
+    await api.delete(`http://localhost:8080/planta/${plantaSelecionada.value.id}`, {
       headers: { Authorization: `Bearer ${token}` }
     })
     $q.notify({
@@ -311,9 +301,9 @@ async function deleteProject () {
       message: 'Planta excluída com sucesso',
       icon: 'check'
     })
-    await fetchProjects()
+    await fetchPlantas()
   } catch (error) {
-    console.error('Error deleting project:', error)
+    console.error('Erro ao excluir planta:', error)
     $q.notify({
       color: 'negative',
       message: 'Erro ao excluir planta',
@@ -321,16 +311,55 @@ async function deleteProject () {
     })
   }
 }
+
+function formatDate (dateString) {
+  return date.formatDate(dateString, 'DD/MM/YYYY')
+}
 </script>
 
 <style scoped>
-.project-card {
+.planta-card {
   height: 100%;
   display: flex;
   flex-direction: column;
+  transition: transform 0.3s;
 }
 
-.project-card .q-card__section:nth-child(2) {
+.planta-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.planta-card .q-card__section {
+  padding: 12px;
+}
+
+.planta-card .q-item {
+  padding: 8px 0;
+}
+
+.planta-card .q-card__section:nth-child(2) {
   flex-grow: 1;
+}
+.q-item {
+  transition: all 0.3s ease;
+}
+
+.q-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Estilos para garantir contraste de texto */
+.bg-yellow-1, .bg-red-1, .bg-green-1, .bg-purple-1, .bg-blue-1 {
+  color: rgba(0, 0, 0, 0.87); /* Texto escuro para fundos claros */
+}
+
+.text-weight-bold, .text-weight-medium {
+  color: rgba(0, 0, 0, 0.87); /* Garante que o texto seja sempre legível */
+}
+
+.q-item-label.overline {
+  color: rgba(0, 0, 0, 0.6); /* Cor mais clara para o texto overline */
 }
 </style>
