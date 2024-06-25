@@ -2,7 +2,7 @@
   <q-page padding>
     <div class="row q-col-gutter-md">
       <div class="col-12">
-        <h2 class="text-h4 q-mb-md">{{ isAdmin ? 'Todos os Projetos' : 'Meus Projetos' }}</h2>
+        <h2 class="text-h4 q-mb-md">{{ isAdmin ? 'Todos os Projetos' : 'Projetos' }}</h2>
       </div>
       <div class="col-12 col-md-6">
         <q-input v-model="searchTerm" label="Pesquisar projetos" dense>

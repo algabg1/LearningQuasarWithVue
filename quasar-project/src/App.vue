@@ -9,7 +9,7 @@ import { setupAuth } from './auth'
 // eslint-disable-next-line import/no-duplicates
 import { createApp } from 'vue'
 import { Quasar } from 'quasar'
-import { createPinia } from 'pinia'
+// import { createPinia } from 'pinia'
 import App from './App.vue'
 defineOptions({
   name: 'App'
@@ -17,7 +17,7 @@ defineOptions({
 
 const app = createApp(App)
 app.use(Quasar)
-app.use(createPinia())
+// app.use(createPinia())
 app.mount('#app')
 onMounted(() => {
   setupAuth()
