@@ -26,7 +26,12 @@
         </q-select>
       </div>
       <div class="col-12">
-        <q-btn color="primary" icon="add" label="Nova planta" @click="openNewProjectDialog" />
+        <q-btn
+          color="primary"
+          label="Adicionar Planta"
+          @click="openAdicionarPlantaDialog"
+          class="q-mr-sm"
+        />
       </div>
       <div v-if="loading" class="col-12 flex flex-center">
         <q-spinner color="primary" size="3em" />
@@ -55,29 +60,34 @@
       </div>
     </div>
 
-    <!-- New Plant Dialog -->
-    <q-dialog v-model="newPlantDialog" persistent>
+    <!-- Diálogo para Adicionar Planta -->
+    <q-dialog v-model="adicionarPlantaDialog" persistent>
       <q-card style="min-width: 350px">
         <q-card-section>
-          <div class="text-h6">Nova planta</div>
+          <div class="text-h6">Adicionar Planta</div>
         </q-card-section>
+
         <q-card-section class="q-pt-none">
-          <q-input v-model="newPlant.nome" label="Nome da Planta" dense />
-          <q-input v-model="newPlant.nome_cientifico" label="Nome Científico" dense />
-          <q-input v-model="newPlant.descricao" label="Descrição" type="textarea" dense />
-          <q-input v-model="newPlant.origem" label="Origem" dense />
-          <q-input v-model="newPlant.cuidados" label="Cuidados" type="textarea" dense />
-          <q-input v-model="newPlant.dataregistro" label="Data de Registro" type="date" dense />
+          <q-input v-model="novaplanta.nome" label="Nome" dense />
+          <q-input v-model="novaplanta.nome_cientifico" label="Nome Científico" dense />
+          <q-input v-model="novaplanta.descricao" label="Descrição" type="textarea" dense />
+          <q-input v-model="novaplanta.origem" label="Origem" dense />
+          <q-input v-model="novaplanta.cuidados" label="Cuidados" type="textarea" dense />
           <q-select
-            v-model="newPlant.categoria"
-            :options="projectTypesForNewProject"
+            v-model="novaplanta.categoria"
+            :options="categorias"
             label="Categoria"
             dense
+            options-dense
+            emit-value
+            map-options
           />
+          <q-input v-model="novaplanta.dataregistro" label="Data de Registro" type="date" dense />
         </q-card-section>
+
         <q-card-actions align="right" class="text-primary">
-          <q-btn flat label="Cancelar" v-close-popup @click="resetNewProject" />
-          <q-btn flat label="Salvar" @click="saveNewProject" />
+          <q-btn flat label="Cancelar" v-close-popup />
+          <q-btn flat label="Adicionar" @click="adicionarPlanta" v-close-popup />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -106,7 +116,7 @@ import { api } from 'boot/axios'
 const $q = useQuasar()
 const plants = ref([])
 const loading = ref(true)
-const newPlantDialog = ref(false)
+const adicionarPlantaDialog = ref(false)
 const confirmDelete = ref(false)
 const projectToDelete = ref(null)
 const searchTerm = ref('')
@@ -117,11 +127,11 @@ const isAdmin = computed(() => user.value.user_role === 'ADMIN')
 
 const newPlant = ref({
   nome: '',
-  nomecientifico: '',
+  nome_cientifico: '',
   descricao: '',
   origem: '',
   cuidados: '',
-  dataregistro: null, // ou uma data padrão, se necessário
+  dataregistro: '',
   categoria: ''
 })
 
@@ -154,7 +164,7 @@ const plantsTypes = [
   { label: 'Camponesa', value: 'CAMPONESA' }
 ]
 
-const projectTypesForNewProject = computed(() =>
+const categorias = computed(() =>
   plantsTypes.filter(type => type.value !== null)
 )
 
@@ -225,9 +235,8 @@ function getProjectTypeColor (type) {
   return colors[type] || 'grey'
 }
 
-function openNewProjectDialog () {
-  resetNewProject()
-  newPlantDialog.value = true
+function openAdicionarPlantaDialog () {
+  adicionarPlantaDialog.value = true
 }
 
 function resetNewProject () {
@@ -237,12 +246,12 @@ function resetNewProject () {
     descricao: '',
     origem: '',
     cuidados: '',
-    dataregistro: null, // ou uma data padrão, se necessário
+    dataregistro: '',
     categoria: ''
   }
 }
 
-async function saveNewProject () {
+async function adicionarPlanta () {
   // Validação de campos
   if (!newPlant.value.nome || !newPlant.value.nomecientifico || !newPlant.value.descricao) {
     $q.notify({
@@ -268,7 +277,7 @@ async function saveNewProject () {
       message: 'Planta cadastrada com sucesso',
       icon: 'check'
     })
-    newPlantDialog.value = false
+    adicionarPlantaDialog.value = false
     resetNewProject()
     await fetchProjects()
   } catch (error) {
